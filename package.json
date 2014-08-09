@@ -1,0 +1,22 @@
+{
+  "name": "passport-demo",
+  "version": "0.0.0",
+  "description": "simple demo user authentication service using express + passport",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.6.2",
+    "cookie-parser": "^1.3.2",
+    "express": "^4.8.2",
+    "express-handlebars": "^1.0.1",
+    "express-session": "^1.7.4",
+    "passport": "^0.2.0",
+    "passport-http": "^0.2.2",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryan Anderson",
+  "license": "MIT"
+}
