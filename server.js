@@ -1,5 +1,8 @@
+var fs = require('fs')
+var https = require('https')
+
 var express = require('express')
-var exphbs  = require('express-handlebars')
+var exphbs = require('express-handlebars')
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
 var expressSession = require('express-session')
@@ -9,6 +12,11 @@ var passportLocal = require('passport-local')
 var passportHttp = require('passport-http')
 
 var app = express()
+
+var server = https.createServer({
+	cert: fs.readFileSync( __dirname + '/my.crt' ),
+	key:  fs.readFileSync( __dirname + '/my.key' )
+}, app)
 
 app.engine('hbs', exphbs({ defaultLayout: 'main.hbs' }))
 app.set('view engine', 'hbs')
@@ -93,6 +101,11 @@ app.get('/api/data', ensureAuthenticated, function (req, res) {
 })
 
 var port = process.env.PORT || 1337
-app.listen(port, function () {
+// with https use server.listen (instead of app.listen)
+// the req will then be passed to express
+server.listen(port, function () {
 	console.log('http://127.0.0.1:' + port + '/')
 })
+
+// generate a development cert for local SSL testing
+// openssl req -x509 -nodes -days 365 -newkey rsa:1024 -out my.crt -keyout my.key
