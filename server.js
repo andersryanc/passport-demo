@@ -6,12 +6,15 @@ var expressSession = require('express-session')
 
 var passport = require('passport')
 var passportLocal = require('passport-local')
+var passportHttp = require('passport-http')
 
 var app = express()
 
 app.engine('hbs', exphbs({ defaultLayout: 'main.hbs' }))
 app.set('view engine', 'hbs')
 
+// cookieParse, expressSession + passport.session
+// only required for local cookie based auth
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(expressSession({
@@ -23,7 +26,10 @@ app.use(expressSession({
 app.use(passport.initialize())
 app.use(passport.session())
 
-passport.use(new passportLocal.Strategy(function (username, password, done) {
+passport.use(new passportLocal.Strategy(verifyCredentials))
+passport.use(new passportHttp.BasicStrategy(verifyCredentials))
+
+function verifyCredentials (username, password, done) {
 	// TODO: store + get actual user from Mongoose
 	if (username === password) {
 		done(null, /* User */ { id: username, name: username })
@@ -36,7 +42,7 @@ passport.use(new passportLocal.Strategy(function (username, password, done) {
 	done(null, null) // login failed
 	done(new Error('ouch!')) // error
 	*/
-}))
+}
 
 passport.serializeUser(function (user, done) {
 	done(null, user.id)
@@ -46,6 +52,14 @@ passport.deserializeUser(function (id, done) {
 	// query db or cache here
 	done(null, { id: id, name: id })
 })
+
+function ensureAuthenticated (req, res, next) {
+	if (req.isAuthenticated()) {
+		next()
+	} else {
+		res.send(403)
+	}
+}
 
 app.get('/', function (req, res) {
 	res.render('index', {
@@ -65,6 +79,17 @@ app.post('/login', passport.authenticate('local'), function (req, res) {
 app.get('/logout', function (req, res) {
 	req.logout() // this method added by passport
 	res.redirect('/')
+})
+
+// Use basic http auth for all /api/** requests
+app.use('/api', passport.authenticate('basic', { session: false }))
+
+app.get('/api/data', ensureAuthenticated, function (req, res) {
+	res.json([
+		{ value: 'foo' },
+		{ value: 'bar' },
+		{ value: 'baz' }
+	])
 })
 
 var port = process.env.PORT || 1337
