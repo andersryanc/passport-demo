@@ -11,6 +11,12 @@ var passport = require('passport')
 var passportLocal = require('passport-local')
 var passportHttp = require('passport-http')
 
+var mongoose = require('mongoose')
+mongoose.connect('mongodb://127.0.0.1:27017/passport-demo')
+
+var User = require('./models/user')
+var Location = require('./models/location')
+
 var app = express()
 
 var server = https.createServer({
@@ -38,27 +44,25 @@ passport.use(new passportLocal.Strategy(verifyCredentials))
 passport.use(new passportHttp.BasicStrategy(verifyCredentials))
 
 function verifyCredentials (username, password, done) {
-	// TODO: store + get actual user from Mongoose
-	if (username === password) {
-		done(null, /* User */ { id: username, name: username })
-	} else {
-		done(null, null)
-	}
+	User.find({ username:username, password:password }, function (err, user) {
+		if (err) done(err)
 
-	/*
-	done(null, user) // login success
-	done(null, null) // login failed
-	done(new Error('ouch!')) // error
-	*/
+		if (user.length > 0) done(null, user[0])
+		else done(null, null)
+	})
 }
 
 passport.serializeUser(function (user, done) {
-	done(null, user.id)
+	done(null, user._id)
 })
 
 passport.deserializeUser(function (id, done) {
-	// query db or cache here
-	done(null, { id: id, name: id })
+	User.findById(id, function (err, user) {
+		if (err) done(err)
+
+		if (user) done(null, { id: user.id, username: user.username, name: user.name })
+		else done(null, null)
+	})
 })
 
 function ensureAuthenticated (req, res, next) {
@@ -92,12 +96,18 @@ app.get('/logout', function (req, res) {
 // Use basic http auth for all /api/** requests
 app.use('/api', passport.authenticate('basic', { session: false }))
 
-app.get('/api/data', ensureAuthenticated, function (req, res) {
-	res.json([
-		{ value: 'foo' },
-		{ value: 'bar' },
-		{ value: 'baz' }
-	])
+app.get('/api/locations', ensureAuthenticated, function (req, res) {
+	Location.find(function (err, locations) {
+		if (err) res.send( err )
+		res.json( locations )
+	})
+})
+
+app.get('/api/users', ensureAuthenticated, function (req, res) {
+	User.find(function (err, users) {
+		if (err) res.send( err )
+		res.json( users )
+	})
 })
 
 var port = process.env.PORT || 1337
