@@ -1,0 +1,20 @@
+{
+  "name": "passport-demo",
+  "version": "0.0.0",
+  "authors": [
+    "Ryan Anderson <anderson.ryanc@gmail.com>"
+  ],
+  "description": "simple demo user authentication service using express + passport",
+  "main": "server.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.2.0"
+  }
+}
