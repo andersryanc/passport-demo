@@ -2,6 +2,10 @@
   "name": "passport-demo",
   "version": "0.1.0",
   "description": "simple demo user authentication service using express + passport",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/andersryanc/passport-demo.git"
+  },
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.6.2",
