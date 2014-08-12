@@ -118,6 +118,3 @@ var port = process.env.PORT || 1337
 server.listen(port, function () {
 	console.log('http://127.0.0.1:' + port + '/')
 })
-
-// generate a development cert for local SSL testing
-// openssl req -x509 -nodes -days 365 -newkey rsa:1024 -out my.crt -keyout my.key
